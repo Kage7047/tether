@@ -30,8 +30,8 @@ type Server struct {
 	// mode). Any other Host header is refused, which stops DNS rebinding: a hostile site pointing
 	// its own name at tether's address would otherwise count as same-origin in the browser.
 	Hosts []string
-	App      fs.FS    // the built PWA
-	Log      *slog.Logger
+	App   fs.FS // the built PWA
+	Log   *slog.Logger
 }
 
 // Handler returns the full HTTP handler.
