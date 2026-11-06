@@ -2,7 +2,7 @@
 
 An iPad companion for my Linux laptop. One Go binary joins my tailnet with Tailscale's `tsnet`
 (no open ports, no passwords: Tailscale says who is connecting) and serves a small installable web
-app for capturing things into my [second brain](https://github.com/Kage7047) and reading it.
+app for capturing things into my second brain (a git-backed markdown vault) and reading it.
 
 - **Capture:** a note, a link or a photo, written into `raw/inbox/` as a new markdown file for
   `/learn` to file later. If the laptop is asleep, captures wait on the iPad and send themselves
