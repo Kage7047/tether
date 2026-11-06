@@ -1,0 +1,16 @@
+# systemd user unit: cp deploy/tether.service ~/.config/systemd/user/ && systemctl --user enable --now tether
+[Unit]
+Description=tether: iPad companion on the tailnet
+After=network-online.target
+
+[Service]
+ExecStart=%h/.local/bin/tether -vault %h/second-brain -allow YOUR_LOGIN@github
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ReadWritePaths=%h/second-brain/raw/inbox %h/second-brain/_data %h/.local/share/tether
+
+[Install]
+WantedBy=default.target
