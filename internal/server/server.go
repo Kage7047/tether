@@ -9,6 +9,7 @@ import (
 	"errors"
 	"io/fs"
 	"log/slog"
+	"net"
 	"net/http"
 	"net/url"
 	"slices"
@@ -25,6 +26,10 @@ type Server struct {
 	Vault    *brain.Vault
 	Identify Identify
 	Allowed  []string // tailnet login names allowed in, e.g. "kage7047@github"
+	// Hosts are the names this server answers to (tailnet DNS name, its IPs, or localhost in dev
+	// mode). Any other Host header is refused, which stops DNS rebinding: a hostile site pointing
+	// its own name at tether's address would otherwise count as same-origin in the browser.
+	Hosts []string
 	App      fs.FS    // the built PWA
 	Log      *slog.Logger
 }
@@ -60,6 +65,14 @@ func (s *Server) secure(next http.Handler) http.Handler {
 		h.Set("X-Content-Type-Options", "nosniff")
 		h.Set("Referrer-Policy", "no-referrer")
 
+		host := r.Host
+		if h, _, err := net.SplitHostPort(host); err == nil {
+			host = h
+		}
+		if !slices.Contains(s.Hosts, strings.TrimSuffix(strings.ToLower(host), ".")) {
+			http.Error(w, "unknown host", http.StatusMisdirectedRequest)
+			return
+		}
 		who, err := s.Identify(r)
 		if err != nil || who == "" || !slices.Contains(s.Allowed, who) {
 			s.Log.Warn("refused", "remote", r.RemoteAddr, "login", who, "err", err)

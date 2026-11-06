@@ -8,6 +8,7 @@ and nothing reaching tether can write outside the inbox or run commands.
 |---|---|---|
 | Someone on the internet reaches tether | It listens only on the tailnet (tsnet); no public port, no port forwarding | by construction |
 | Another device or user on the same tailnet | Every request's tailnet login is looked up with WhoIs and checked against `-allow` | `TestOnlyAllowedLoginsGetIn` |
+| DNS rebinding: a hostile site points its own name at tether's address, so the browser treats it as same-origin | Only the tailnet name, its IPs (or localhost in dev mode) are accepted as Host; anything else gets `421` | `TestUnknownHostRefused` |
 | A web page the owner visits makes the browser POST to tether (CSRF) | Writes need a custom `X-Tether` header (no CORS is ever granted) and a same-host Origin | `TestCaptureNeedsSameOriginWrite` |
 | A page name reads files outside `wiki/` (`../`, absolute paths, symlinks) | Strict name pattern, then the resolved path must stay inside `wiki/` | `TestPageReadsOnlyInsideWiki` |
 | A capture overwrites a note, or a photo name plants an executable | New files only (`O_EXCL`); the client's file name is discarded except a whitelisted image extension | `TestSaveWritesNewFilesOnly`, `TestSavePhotoKeepsOnlyASafeExtension` |

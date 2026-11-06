@@ -27,6 +27,7 @@ func setup(t *testing.T) (*brain.Vault, http.Handler) {
 		// tests name the user in a header; in production the tailnet's WhoIs does
 		Identify: func(r *http.Request) (string, error) { return r.Header.Get("Test-Login"), nil },
 		Allowed:  []string{"ilya@github"},
+		Hosts:    []string{"example.com", "tether.tail"},
 		Log:      slog.New(slog.DiscardHandler),
 	}
 	return v, s.Handler()
@@ -46,6 +47,15 @@ func TestOnlyAllowedLoginsGetIn(t *testing.T) {
 		if got := do(h, r).Code; got != want {
 			t.Errorf("login %q: %d, want %d", login, got, want)
 		}
+	}
+}
+
+func TestUnknownHostRefused(t *testing.T) {
+	_, h := setup(t)
+	r := httptest.NewRequest("GET", "http://rebind.evil.example/api/page?name=board", nil)
+	r.Header.Set("Test-Login", "ilya@github")
+	if got := do(h, r).Code; got != http.StatusMisdirectedRequest {
+		t.Fatalf("DNS-rebinding host: %d, want 421", got)
 	}
 }
 

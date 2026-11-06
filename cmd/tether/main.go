@@ -52,6 +52,7 @@ func main() {
 			fatal(log, err)
 		}
 		s.Allowed = []string{"dev@local"}
+		s.Hosts = []string{"127.0.0.1", "localhost"}
 		s.Identify = func(r *http.Request) (string, error) { return "dev@local", nil }
 		log.Info("dev mode: no tailnet, localhost only", "url", "http://127.0.0.1:8787")
 	} else {
@@ -72,6 +73,14 @@ func main() {
 		}
 		if err != nil {
 			fatal(log, err)
+		}
+		st, err := lc.Status(ctx)
+		if err != nil {
+			fatal(log, err)
+		}
+		s.Hosts = []string{strings.ToLower(*hostname), strings.TrimSuffix(strings.ToLower(st.Self.DNSName), ".")}
+		for _, ip := range st.TailscaleIPs {
+			s.Hosts = append(s.Hosts, ip.String())
 		}
 		s.Identify = func(r *http.Request) (string, error) {
 			who, err := lc.WhoIs(r.Context(), r.RemoteAddr)
